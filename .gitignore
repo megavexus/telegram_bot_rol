@@ -1,3 +1,5 @@
 token_telegram.py
 *.pyc
 *__pycache__*
+venv
+vscode
