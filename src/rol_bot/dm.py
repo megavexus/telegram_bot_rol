@@ -1,6 +1,5 @@
 DM = None
 
-
 def set_DM(bot, update):
     global DM
     if DM == None:

@@ -1,4 +1,4 @@
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, Filters, CommandHandler, MessageHandler
 from token_telegram import TOKEN
 
 import logging
@@ -39,11 +39,18 @@ def help_message(bot, update):
                     "\n /printinventory - Current state of the inventory.")
 
 
+def unknown(bot, update):
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Sorry, I didn't understand that command.")
+
+
 if __name__ == "__main__":
     #dispatcher.add_handler(incomingMessages)
     start_handler = CommandHandler('start', start)
     help_handler = CommandHandler('help', help_message)
+    unknown_handler = MessageHandler(Filters.command, unknown)
 
+    dispatcher.add_handler(unknown_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
