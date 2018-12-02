@@ -25,7 +25,7 @@ class CharacterUnchartedWorlds(Character):
             "thief",
             "ranger"
         }
-        super(CharacterDAndD, self).__init__(*args, **kwargs)
+        super(CharacterUnchartedWorlds, self).__init__(*args, **kwargs)
 
     def get_data_sheet(self):
         return (str(self.characterName) + "\n Created by: " + str(self.playerName)

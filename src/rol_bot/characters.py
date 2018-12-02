@@ -1,16 +1,19 @@
-from utils import parseInput
-from characters.character_base import NotExistentElementException
+from rol_bot.utils import parseInput
+from rol_bot.character.character_base import NotExistentElementException
+from rol_bot.character import character_factory
 
 characterList = []
 playerIndex = 0
 attributes = False
 
 def createCharacter(bot, update):
-    global playerIndex
+    global playerIndex, game_type
     if findCharacterIndex(update.message.from_user.first_name) != -1:
         bot.sendMessage(chat_id=update.message.chat_id, text="@" +
                         update.message.from_user.first_name + " already has a character")
         return None
+
+    Character = character_factory(game_type)
     characterName = update.message.text[17:].lower()
     playerName = update.message.from_user.first_name
     characterList.append(Character(playerName, characterName))
@@ -100,6 +103,7 @@ def findCharacterIndex(first_name):
 def alterHealth(bot, update):
     global DM
     #/changehealth charactername value
+
     user = update.message.from_user.first_name
     if user != DM:
         bot.sendMessage(chat_id=update.message.chat_id,
@@ -115,6 +119,7 @@ def alterHealth(bot, update):
 
 def inventoryUpdate(bot, update):
     global DM
+
     user = update.message.from_user.first_name
     if user != DM:
         bot.sendMessage(chat_id=update.message.chat_id,

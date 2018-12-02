@@ -3,3 +3,4 @@ token_telegram.py
 *__pycache__*
 venv
 vscode
+*egg-info

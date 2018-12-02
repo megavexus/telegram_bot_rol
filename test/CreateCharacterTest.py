@@ -10,7 +10,7 @@ class Character(object):
     playername = None
     charactername = None
     race = None
-    _class = None
+    class = None
     stats = {}
     def __init__(self, playername, charactername):
         self.playername = playername
