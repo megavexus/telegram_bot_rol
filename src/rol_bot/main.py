@@ -1,5 +1,5 @@
 from telegram.ext import Updater, Filters, CommandHandler, MessageHandler
-from rol_bot.token_telegram import TOKEN
+from rol_bot.token_telegram import get_token
 from rol_bot.character.exceptions import NotExistentElementException
 from rol_bot.dice import roll_dice
 from rol_bot.dm import set_DM
@@ -61,7 +61,8 @@ def echo(bot, update):
     update.message.reply_text(update.message.text)
 
 if __name__ == "__main__":
-    updater = Updater(token=TOKEN)
+    token = get_token()
+    updater = Updater(token=get_token())
     dispatcher = updater.dispatcher
 
     #dispatcher.add_handler(incomingMessages)
