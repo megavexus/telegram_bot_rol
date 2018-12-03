@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  telegram_bot:
+    container_name: telegram_bot
+    hostname: telegram_bot
+    build:
+      context: .
+    environment:
+      - APP_HOME=/opt/telegram_bot
+    volumes:
+      - ./src:/opt/telegram_bot/src
