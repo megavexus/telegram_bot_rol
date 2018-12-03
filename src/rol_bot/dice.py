@@ -26,7 +26,6 @@ def roll_dice(bot, update, args):
     /roll n
     /roll ndm
     """
-
     dice = "2d6"
 
     if len(args) == 0:
@@ -42,22 +41,35 @@ def roll_dice(bot, update, args):
             return
             #bot.sendMessage(chat_id=update.message.chat_id, text="Daniel, eres retrasado")
             #return
-
+        try:
+            corrector = int(args[1])
+        except:
+            corrector = 0
     try:
         dices_results = roll_dices_results(dice)
     except ValueError as e:
         bot.sendMessage(chat_id=update.message.chat_id, text=str(e))
 
     result = sum(dices_results)
-    tot_result = result + modificator
-    if modificator >= 0:
-        text = "You rolled {} = {} + {} = {}".format(
-            dices_results, result, modificator, tot_result)
-    else:
-        text = "You rolled {} = {} - {} = {}".format(
-            dices_results, result, -1*modificator, tot_result)
+    tot_result = result + modificator + corrector
+    username = update.message.from_user.username
 
-    bot.sendMessage(chat_id=update.message.chat_id, text=text)
+    if modificator >= 0:
+        text = "@{} rolled {} = {} + {}".format(
+            username,dices_results, result, modificator)
+    else:
+        text = "@{} rolled {} = {} - {}".format(
+            username, dices_results, result, -1*modificator)
+
+    if corrector > 0:
+        text += " + {}".format(corrector)
+    elif corrector < 0:
+        text += " - {}".format(-1*corrector)
+
+    text += " = {}".format(tot_result)
+
+    #update.message.reply_text(text)
+    #bot.sendMessage(chat_id=update.message.chat_id, text=text)
 
     if tot_result <= 6:
         resolution = "Fracaso :("
@@ -66,6 +78,7 @@ def roll_dice(bot, update, args):
     else:
         resolution = "Exito!"
 
-    bot.sendMessage(chat_id=update.message.chat_id, text=resolution)
+    update.message.reply_text(text + "\n" + resolution)
+    #bot.sendMessage(chat_id=update.message.chat_id, text=resolution)
 
 
