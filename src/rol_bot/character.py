@@ -18,7 +18,6 @@ class Stats(Enum):
         stat = stat.upper()
 
         for member in Stats:
-            compare_member = member
             if member.name == stat:
                 return member
             elif member.value == stat:
@@ -29,7 +28,8 @@ class Stats(Enum):
         stat = Stats.get_stat(stat)
         return stat != None
 
-class Archetipes(Enum):
+
+class Archetypes(Enum):
     ACADEMIC = 1
     CLANDESTINE = 2
     COMMERCIAL = 3
@@ -40,6 +40,18 @@ class Archetipes(Enum):
     SCOUNDRED = 8
     STARFARER = 9
     TECHNOCRAT = 10
+
+    @staticmethod
+    def is_valid_archetype(archetype):
+        if type(archetype) != str:
+            return False
+
+        archetype = archetype.upper()
+
+        for member in Archetypes:
+            if member.name == archetype:
+                return True
+        return False
 
 class Origin(Enum):
     ADVANCED = 1
@@ -130,6 +142,32 @@ class Character(object):
         if stat_elem:
             return self.stats[stat_elem.name.lower()]
 
+    def set_archetypes(self, archetypes):
+        if type(archetypes) == str:
+            if ',' in archetypes:
+                archetypes = archetypes.split(',')
+            else:
+                archetypes = [archetypes]
+
+        if type(archetypes) == list:
+            clean_archetypes = [
+                arch.strip().lower()
+                for arch in archetypes
+                if type(arch) == str
+                and Archetypes.is_valid_archetype(arch.strip().lower())
+            ]
+
+            self.archetypes = self.archetypes.union(clean_archetypes)
+    def get_archetypes(self):
+        return self.archetypes
+
+    def get_origin(self, origin):
+        raise NotImplementedError()
+
+    def set_origin(self, origin):
+        raise NotImplementedError()
+
+
     def get_data_sheet(self):
         data_sheet = """
         **{name}**
@@ -163,12 +201,6 @@ class Character(object):
         raise NotImplementedError()
 
     def set_xp(self, archetype, value):
-        raise NotImplementedError()
-
-    def get_origin(self, origin):
-        raise NotImplementedError()
-
-    def set_origin(self, origin):
         raise NotImplementedError()
 
     def add_to_inventory(self, item, amount=1):

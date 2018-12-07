@@ -78,15 +78,54 @@ def test_get_stats(character, check_stat, value, stat):
     value_saved = character.get_stat(check_stat)
     assert value_saved == int(value)
 
-@pytest.mark.skip()
+@pytest.mark.parametrize("archetypes, expected",[
+    ("academic", set(["academic"])),
+    (["academic", "commercial"], set(["academic", "commercial"])),
+    (["academic", "commercial"], set(["academic", "commercial"])),
+    ("academic, industrial", set(["academic", "industrial"])),
+    ("academic, academic, commercial,industrial",
+     set(["academic", "commercial", "industrial"]))
+])
 def test_set_archetypes(character, archetypes, expected):
+    character.set_archetypes(archetypes)
+    assert character.archetypes == expected
+
+@pytest.mark.parametrize("archetypes, expected", [
+    ("acadaemic", set()),
+    (["acadeamic", "commearcial"], set()),
+    (["acaqdemic", "commercial"], set(["commercial"])),
+    ("academaic, commerciaal", set()),
+    ("acadeamic, academic, commercial", set(["academic", "commercial"])),
+])
+def test_set_bad_archetypes(character, archetypes, expected):
+    character.set_archetypes(archetypes)
+    assert character.archetypes == expected
+
+
+@pytest.mark.parametrize("archetypes, expected", [
+    ("academic", set(["academic"])),
+    (["academic", "commercial"], set(["academic", "commercial"])),
+    (["academic", "commercial"], set(["academic", "commercial"])),
+    ("academic, industrial", set(["academic", "industrial"])),
+    ("academic, academic, commercial", set(["academic", "commercial"]))
+])
+def test_get_archetypes(character, archetypes, expected):
+    character.set_archetypes(archetypes)
+    assert character.get_archetypes() == expected
+
+@pytest.mark.skip()
+def test_set_origin():
     pass
 
 
 @pytest.mark.skip()
-def test_get_archetypes(character, archetypes, expected):
+def test_set_bad_origin():
     pass
 
+
+@pytest.mark.skip()
+def test_get_origin():
+    pass
 
 @pytest.mark.skip
 def test_load_empty_character(database):
