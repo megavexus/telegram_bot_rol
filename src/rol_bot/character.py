@@ -1,6 +1,15 @@
 from .database import RpgDatabase
 from enum import Enum
 
+"""
+ROADMAP:
+    - Añadir Skills
+    - Añadir Inventario
+    - Añadir Reputaciones (??)
+        + Crear clase nueva de listado de reputaciones
+        + Dejar al GM dar de alta reputaciones
+"""
+
 
 class Stats(Enum):
     METLLE = "M"
@@ -64,6 +73,18 @@ class Origin(Enum):
     REGIMENTED = 8
     SPACER = 9
     VIOLENT = 10
+
+    @staticmethod
+    def is_valid_origin(origin):
+        if type(origin) != str:
+            return False
+
+        origin = origin.upper()
+
+        for member in Origin:
+            if member.name == origin:
+                return True
+        return False
 
 class NotExistentStatException(Exception):
     """ Excepcion cuando no existe un stat """
@@ -158,15 +179,21 @@ class Character(object):
             ]
 
             self.archetypes = self.archetypes.union(clean_archetypes)
+            return self.archetypes
+
     def get_archetypes(self):
         return self.archetypes
 
-    def get_origin(self, origin):
-        raise NotImplementedError()
-
     def set_origin(self, origin):
-        raise NotImplementedError()
+        if type(origin) != str:
+            return
+        origin = origin.strip().lower()
+        if Origin.is_valid_origin(origin):
+            self.origin = origin
+            return origin
 
+    def get_origin(self):
+        return self.origin
 
     def get_data_sheet(self):
         data_sheet = """
@@ -211,12 +238,3 @@ class Character(object):
 
     def get_inventory(self):
         raise NotImplementedError()
-
-"""
-ROADMAP:
-    - Añadir Skills
-    - Añadir Inventario
-    - Añadir Reputaciones
-        + Opción de doble reputación? Mejor no.
-
-"""

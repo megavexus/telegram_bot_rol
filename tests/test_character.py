@@ -104,28 +104,52 @@ def test_set_bad_archetypes(character, archetypes, expected):
 
 @pytest.mark.parametrize("archetypes, expected", [
     ("academic", set(["academic"])),
+    ("", set()),
+    (None, set()),
+    (1234, set()),
     (["academic", "commercial"], set(["academic", "commercial"])),
     (["academic", "commercial"], set(["academic", "commercial"])),
     ("academic, industrial", set(["academic", "industrial"])),
     ("academic, academic, commercial", set(["academic", "commercial"]))
+
 ])
 def test_get_archetypes(character, archetypes, expected):
     character.set_archetypes(archetypes)
     assert character.get_archetypes() == expected
 
-@pytest.mark.skip()
-def test_set_origin():
-    pass
+
+@pytest.mark.parametrize("origin, expected", [
+    ("privileged", "privileged"),
+    ("FRONTLER", "frontler"),
+    (" CrOwDeD ", "crowded")
+])
+def test_set_origin(character, origin, expected):
+    character.set_origin(origin)
+    assert character.origin == expected
 
 
-@pytest.mark.skip()
-def test_set_bad_origin():
-    pass
+@pytest.mark.parametrize("origin", [
+    ("privilegaed"),
+    ("FRONTLERa"),
+    (" CrOwDeDa "),
+    (None),
+    (1234),
+    ("")
+])
+def test_set_bad_origin(character, origin):
+    ret = character.set_origin(origin)
+    assert ret == None
+    assert character.origin == None
 
 
-@pytest.mark.skip()
-def test_get_origin():
-    pass
+@pytest.mark.parametrize("origin, expected", [
+    ("privileged", "privileged"),
+    ("FRONTLER", "frontler"),
+    (" CrOwDeD ", "crowded")
+])
+def test_get_origin(character, origin, expected):
+    character.set_origin(origin)
+    assert character.get_origin() == expected
 
 @pytest.mark.skip
 def test_load_empty_character(database):
