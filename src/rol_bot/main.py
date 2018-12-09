@@ -1,22 +1,34 @@
-from telegram.ext import Updater, CommandHandler
-from token_telegram import TOKEN
+from telegram.ext import Updater, Filters, CommandHandler, MessageHandler
+from rol_bot.token_telegram import get_token
+from rol_bot.character.exceptions import NotExistentElementException
+from rol_bot.dice import roll_dice
+from rol_bot.dm import set_DM
+from rol_bot.characters import alterExperience, alterGold, alterHealth, printCharacterStats, printInventory, createCharacter, inventoryUpdate
+from rol_bot.monsters import create_monster, attack_monster
 
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-from dice import roll_dice
-from dm import set_DM
-from characters import alterExperience, alterGold, alterHealth, printCharacterStats, printInventory, createCharacter,inventoryUpdate
-from monsters import create_monster, attack_monster
-
-updater = Updater(token=TOKEN)
-dispatcher = updater.dispatcher
+logger = logging.getLogger(__name__)
 
 
+game_type = None
 
-def start(bot, update):
-    #Displays "Welcome to Dungeons and Dragons.")
+def start(bot, update, args):
+    global game_type
+
+    games = {
+        'dand':"Dungeons and Dragons",
+        "uncharted": "Uncharted Worlds"
+    }
+
+    if len(args) == 0 or args[0] not in games:
+        bot.sendMessage(chat_id=update.message.chat_id,
+                            text="You must select one of the games: /roll {}.".format(games.keys()))
+        return None
+    game_type = args[0]
+    # TODO: mandar un ReplyKeyboard para seleccionar el juego
     bot.sendMessage(chat_id = update.message.chat_id, text = "Welcome to Dungeons and Dragons.")
 
 
@@ -39,23 +51,41 @@ def help_message(bot, update):
                     "\n /printinventory - Current state of the inventory.")
 
 
+def unknown(bot, update):
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Sorry, I didn't understand that command.")
+
+
+def echo(bot, update):
+    """Echo the user message."""
+    update.message.reply_text(update.message.text)
+
 if __name__ == "__main__":
+    token = get_token()
+    updater = Updater(token=get_token())
+    dispatcher = updater.dispatcher
+
     #dispatcher.add_handler(incomingMessages)
     start_handler = CommandHandler('start', start)
     help_handler = CommandHandler('help', help_message)
+    unknown_handler = MessageHandler(Filters.command, unknown)
 
+    #dispatcher.add_handler(unknown_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
 
     # Dice
-    dice_handler = CommandHandler('roll', roll_dice)
+    dice_handler = CommandHandler('roll', roll_dice, pass_args=True)
     dispatcher.add_handler(dice_handler)
 
     # DM
+    """
     set_dm_handler = CommandHandler("set_dm", set_DM)
     dispatcher.add_handler(set_dm_handler)
+    """
 
     # Character
+    """
     change_health_handler = CommandHandler('changehealth', alterHealth)
     create_character_handler = CommandHandler('createcharacter', createCharacter)
     print_character_handler = CommandHandler('printcharacterstats', printCharacterStats)
@@ -63,7 +93,6 @@ if __name__ == "__main__":
     print_inventory_handler = CommandHandler('printinventory', printInventory)
     change_gold_handler = CommandHandler('changegold', alterGold)
     change_exp_handler = CommandHandler('changexp', alterExperience)
-
     dispatcher.add_handler(change_health_handler)
     dispatcher.add_handler(create_character_handler)
     dispatcher.add_handler(print_character_handler)
@@ -71,12 +100,16 @@ if __name__ == "__main__":
     dispatcher.add_handler(print_inventory_handler)
     dispatcher.add_handler(change_gold_handler)
     dispatcher.add_handler(change_exp_handler)
+    """
 
     # Monsters
+    """
     create_monster_handler = CommandHandler("createmonster", create_monster)
     attack_monster_handler = CommandHandler("attachmonster", attack_monster)
-
     dispatcher.add_handler(create_monster_handler)
     dispatcher.add_handler(attack_monster_handler)
+    """
 
     updater.start_polling()
+
+    updater.idle()
