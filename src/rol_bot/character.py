@@ -10,14 +10,13 @@ ROADMAP:
         + Dejar al GM dar de alta reputaciones
 """
 
-
 class Stats(Enum):
-    METLLE = "M"
-    INFLUENCE = "I"
-    EXPERTISE = "E"
-    PSYQUE = "P"
-    INTERFACE = "IN"
-    ARMOR = "A"
+    METLLE = "MET"
+    INFLUENCE = "INF"
+    EXPERTISE = "EXP"
+    PSYQUE = "PSY"
+    INTERFACE = "INT"
+    ARMOR = "ARM"
 
     @staticmethod
     def get_stat(stat):
@@ -112,13 +111,17 @@ class Character(object):
         self.origin = None
         self.factions = dict()
 
-    def load(self, username):
-        self.username = username
-        data = self.db.get_character(username)
-        for key, value in data.get("stats", {}):
-            self.set_stat(key, value)
+    def load(self):
+        data = self.db.get_character(self.username)
+        if data:
+            for key, value in data.get("stats", {}):
+                self.set_stat(key, value)
 
-        self.archetypes = data.get("archetypes")
+            if "origin" in data:
+                self.set_origin(data.get("origin"))
+
+            if "archetypes" in data:
+                self.set_archetypes(data.get("archetypes"))
 
     def save(self):
         self.db.upsert_character(self.username, self.to_dict())

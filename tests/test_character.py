@@ -20,16 +20,16 @@ def test_create_empty_character(database):
 
 
 @pytest.mark.parametrize("stat, value, check_stat", [
-    ("M", 3, "metlle"),
+    ("met", 3, "metlle"),
     ("METLLE", 3, "metlle"),
     ("metlle", 3, "metlle"),
     ("Influence", 2, "influence"),
-    ("I", 2, "influence"),
+    ("INF", 2, "influence"),
     ("PSYQUE", 2, "psyque"),
-    ("P", "2", "psyque"),
+    ("PSY", "2", "psyque"),
     ("interface", 2, "interface"),
-    ("IN", 2, "interface"),
-    ("A", "3", "armor"),
+    ("INT", 2, "interface"),
+    ("Arm", "3", "armor"),
     ("armor", -1, "armor")
 ])
 def test_set_stats(character, stat, value, check_stat):
@@ -61,16 +61,16 @@ def test_set_bad_stat_value(character, stat, value):
 
 
 @pytest.mark.parametrize("stat, value, check_stat", [
-    ("M", 3, "metlle"),
+    ("MET", 3, "metlle"),
     ("METLLE", 3, "metlle"),
     ("metlle", 3, "metlle"),
     ("Influence", 2, "influence"),
-    ("I", 2, "influence"),
+    ("INF", 2, "influence"),
     ("PSYQUE", 2, "psyque"),
-    ("P", "2", "psyque"),
+    ("PSY", "2", "psyque"),
     ("interface", 2, "interface"),
-    ("IN", 2, "interface"),
-    ("A", "3", "armor"),
+    ("INT", 2, "interface"),
+    ("ARM", "3", "armor"),
     ("armor", -1, "armor")
 ])
 def test_get_stats(character, check_stat, value, stat):
@@ -151,17 +151,29 @@ def test_get_origin(character, origin, expected):
     character.set_origin(origin)
     assert character.get_origin() == expected
 
-@pytest.mark.skip
+
 def test_load_empty_character(database):
     username = "test"
     character = Character(database, username)
     character.load()
     assert character.username == username
-
+    assert character.name == ""
+    assert character.stats == {'armor': 0,
+                               'expertise': 0,
+                               'influence': 0,
+                               'interface': 0,
+                               'metlle': 0,
+                               'psyque': 0}
+    assert character.origin == None
+    assert character.archetypes == set()
 
 @pytest.mark.skip
 def test_save_character(database):
-    pass
+    username = "test_complete"
+    character = Character(database, username)
+    character.set_origin("ADVANCED")
+    character.set_archetypes("technocrat, commercial")
+    character.set_stat()
 
 
 @pytest.mark.skip
