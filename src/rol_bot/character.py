@@ -114,7 +114,7 @@ class Character(object):
     def load(self):
         data = self.db.get_character(self.username)
         if data:
-            for key, value in data.get("stats", {}):
+            for key, value in data.get("stats", {}).items():
                 self.set_stat(key, value)
 
             if "origin" in data:
@@ -132,7 +132,7 @@ class Character(object):
             "name":self.name,
             "description": self.description,
             "origin": self.origin,
-            "archetypes": self.archetypes,
+            "archetypes": [arch for arch in self.archetypes],
             "stats":self.stats,
             "inventory":self.inventory,
             "factions": self.factions

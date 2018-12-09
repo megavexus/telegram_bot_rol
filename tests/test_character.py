@@ -167,15 +167,21 @@ def test_load_empty_character(database):
     assert character.origin == None
     assert character.archetypes == set()
 
-@pytest.mark.skip
-def test_save_character(database):
+def test_save_and_load_character(database):
     username = "test_complete"
     character = Character(database, username)
     character.set_origin("ADVANCED")
     character.set_archetypes("technocrat, commercial")
-    character.set_stat()
+    character.set_stat("met", 2)
+    character.set_stat("inf", 1)
+    character.set_stat("exp", 1)
+    character.set_stat("psy", 0)
+    character.set_stat("int", -1)
+    character.set_stat("arm", 1)
+    character.save()
 
-
-@pytest.mark.skip
-def test_load_created_character(database):
-    pass
+    char2 = Character(database, username)
+    char2.load()
+    assert char2.stats == character.stats
+    assert char2.origin == character.origin
+    assert char2.archetypes == character.archetypes
