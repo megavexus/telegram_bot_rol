@@ -2,9 +2,8 @@ from telegram.ext import Updater, Filters, CommandHandler, MessageHandler
 from rol_bot.token_telegram import get_token
 from rol_bot.character.exceptions import NotExistentElementException
 from rol_bot.dice import roll_dice
-from rol_bot.dm import set_DM
 from rol_bot.characters import alterExperience, alterGold, alterHealth, printCharacterStats, printInventory, createCharacter, inventoryUpdate
-from rol_bot.monsters import create_monster, attack_monster
+import click
 
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -60,10 +59,33 @@ def echo(bot, update):
     """Echo the user message."""
     update.message.reply_text(update.message.text)
 
-if __name__ == "__main__":
+class GameDriver(object):
+    def __init__(self, db_path):
+        # TODO: fija la DB
+        pass
+
+    def set_dm(self, username):
+        pass
+
+    def get_character(self, username):
+        pass
+
+
+@click.command()
+@click.option('--db_path', '-db', help="Path a la base de datos que consultará", type=click.Path(), default="./db.json")
+def main(db_path):
     token = get_token()
     updater = Updater(token=get_token())
     dispatcher = updater.dispatcher
+
+    # /set_dm <name>
+    # /create_character name
+    # /set_stat <stat> <attr>
+    # /set_origin <origin>
+    # /set_archetypes <archetype1> <archetype2> ...
+    # /view_character [<username>]
+    # /roll <num_stat> <Modificator>
+    # /rolls <stat> <Modificator>
 
     #dispatcher.add_handler(incomingMessages)
     start_handler = CommandHandler('start', start)
@@ -113,3 +135,6 @@ if __name__ == "__main__":
     updater.start_polling()
 
     updater.idle()
+
+if __name__ == "__main__":
+
