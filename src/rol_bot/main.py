@@ -5,6 +5,9 @@ from rol_bot.dice import roll_dice
 from rol_bot.characters import alterExperience, alterGold, alterHealth, printCharacterStats, printInventory, createCharacter, inventoryUpdate
 import click
 
+from rol_bot.character import Character
+from rol_bot.database import RpgDatabase
+
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -61,14 +64,34 @@ def echo(bot, update):
 
 class GameDriver(object):
     def __init__(self, db_path):
-        # TODO: fija la DB
-        pass
+        self.db_path = db_path
+        self.db = RpgDatabase(db_path)
 
-    def set_dm(self, username):
-        pass
+    def handler_set_gm(self, bot, update, args):
+        username = update.message.from_user.username
+        target_user = args[0]
+        try:
+            force_param = args[1] == "--force"
+        except:
+            force_param == False
 
-    def get_character(self, username):
-        pass
+        if self.db.get_gm() == None or self.db.is_gm(username) or force_param:
+            self.db.set_gm(target_user.strip())
+        else:
+            text = "Error. Sólo el actual GM ({}) puede fijar otro GM".format(
+                self.db.get_gm()
+            )
+            bot.sendMessage(chat_id=update.message.chat_id, text=text)
+
+    def _get_character(self, update, username = ""):
+        if username != "":
+            username = update.message.from_user.username
+        character = Character(self.db, username)
+        return character
+
+    def set_name(self, bot, update):
+
+        # Coge al
 
 
 @click.command()
@@ -137,4 +160,4 @@ def main(db_path):
     updater.idle()
 
 if __name__ == "__main__":
-
+    main()

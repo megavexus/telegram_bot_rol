@@ -12,12 +12,18 @@ class RpgDatabase():
     def set_gm(self, username):
         return self.db.upsert({"username": username, "type": self.GM_TYPE}, self.Character.type == "GM")
 
-    def get_gm(self, username):
+    def get_gm(self):
         gm = self.db.search(self.Character.type == self.GM_TYPE)
         if len(gm) == 0:
             return None
         else:
             return gm[0]['username']
+
+    def is_gm(self, username):
+        gm = self.get_gm()
+        if gm != None:
+            return gm == username
+        return False
 
     def get_character(self, username):
         data = self.db.search(self.Character.username == username)
