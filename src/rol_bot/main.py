@@ -83,15 +83,40 @@ class GameDriver(object):
             )
             bot.sendMessage(chat_id=update.message.chat_id, text=text)
 
-    def _get_character(self, update, username = ""):
-        if username != "":
+    def _get_character(self, update, username = None):
+        if username == None:
             username = update.message.from_user.username
         character = Character(self.db, username)
         return character
 
-    def set_name(self, bot, update):
+    def set_name(self, bot, update, args):
+        name = args[0]
+        character = self._get_character()
+        character.set_name(name)
+        character.save()
+    
+    def set_origin(self, bot, update, args):
+        origin = args[0]
+        character = self._get_character()
+        character.set_origin(origin)
+        character.save()
 
-        # Coge al
+    def set_archetypes(self, bot, update, args):
+        archetypes = [args[0]]
+        if len(args) > 1:
+            archetypes.append(args[1])
+        character = self._get_character()
+        character.set_archetypes(archetypes)
+        character.save()
+
+    def set_stat(self, bot, update, args):
+        stat = args[0]
+        try:
+            value = int(args[1])
+        except:
+            text = "Error. El "
+            bot.sendMessage(chat_id=update.message.chat_id, text=text)
+        pass
 
 
 @click.command()
