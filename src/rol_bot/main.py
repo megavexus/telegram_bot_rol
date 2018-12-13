@@ -17,40 +17,20 @@ logger = logging.getLogger(__name__)
 
 game_type = None
 
-def start(bot, update, args):
-    global game_type
-
-    games = {
-        'dand':"Dungeons and Dragons",
-        "uncharted": "Uncharted Worlds"
-    }
-
-    if len(args) == 0 or args[0] not in games:
-        bot.sendMessage(chat_id=update.message.chat_id,
-                            text="You must select one of the games: /roll {}.".format(games.keys()))
-        return None
-    game_type = args[0]
-    # TODO: mandar un ReplyKeyboard para seleccionar el juego
-    bot.sendMessage(chat_id = update.message.chat_id, text = "Welcome to Dungeons and Dragons.")
-
-
 def help_message(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="I am the Dungeons and Dragons bot, and I can help to automate a few processes in your game of D&D to make it easier for everyone to play on Telegram." +
-                    "\n Here are a list of commands that I can execute!" +
-                    "\n \n Player Commands:" +
-                    "\n /start - starts the DnD bot" +
-                    "\n /createcharacter [character name] - Use this command and follow the prompts to create a new character" +
-                    "\n /printcharacterstats [character name] - Prints a character's stats, add the name of the chharacter after the command" +
-                    "\n /help - Open this help message" +
-                    "\n /roll[int] - Rolls a dice with the customisable maximum value"
-                    "\n \n Dungeon Master Commands:" +
-                    "\n /createmonster [monster name] [health points] - Creates a monster." +
-                    "\n /attackmonster [monster name] [damage] - Reduces health of the monster by a given number." +
-                    "\n /changexp [character name] +/- X - Adds or subtracts a certain amount of health from a character." +
-                    "\n /changegold [character name] +/- X - Adds or subtracts a certain amount of gold from a character." +
-                    "\n /changehealth [character name] +/- X - Adds or subtacts a certain amount of health from a character."
-                    "\n /inventoryupdate [character name] add/remove [item] [no. of item] - Adds or removes a certain amount of a specific item from a character's inventory."
-                    "\n /printinventory - Current state of the inventory.")
+    bot.sendMessage(chat_id=update.message.chat_id, text=\
+        "I am the Uncharted Worlds bot, and I can help to automate a few processes for make it easier for everyone to play on Telegram!." +
+        "\n Here are a list of commands that I can execute!" +
+        "\n /help - Open this help message" +
+        "\n /roll <Number(int)> [<Modificator(int)>] - Rolls a 2d6 dice with + Number + Modificator" +
+        "\n \n Player Commands:" +
+        "\n /start - starts the DnD bot" +
+        "\n /createcharacter [character name] - Use this command and follow the prompts to create a new character" +
+        "\n /printcharacterstats [character name] - Prints a character's stats, add the name of the chharacter after the command" +
+        "\n /roll[int] - Rolls a dice with the customisable maximum value"
+        "\n \n Game Master Commands:" +
+        "\n /inventoryupdate [character name] add/remove [item] [no. of item] - Adds or removes a certain amount of a specific item from a character's inventory."
+        "\n /printinventory - Current state of the inventory.")
 
 
 def unknown(bot, update):
@@ -110,14 +90,42 @@ class GameDriver(object):
         character.save()
 
     def set_stat(self, bot, update, args):
+        if len(args) != 2:
+            text = "Error! El comando tiene la forma /set_stat <STAT> <VALUE>"
+            bot.sendMessage(chat_id=update.message.chat_id, text=text)
+            return
+
         stat = args[0]
         try:
             value = int(args[1])
-        except:
-            text = "Error. El "
-            bot.sendMessage(chat_id=update.message.chat_id, text=text)
-        pass
+            character = self._get_character()
+            character.set_stat(stat, value)
+            character.save()
+            text = "Stats actualizados!"
+        except ValueError:
+            text = "Error. El segundo parámetro debe de ser un número."
+        except Exception:
+            text = "Error. El stat {} no existe. Pruebe con uno de los siguientes: \n".format(stat)
+            text += "\t - metlle (met)\n"
+            text += "\t - influence (imf)\n"
+            text += "\t - expertise (exp)\n"
+            text += "\t - psyque (psy)\n"
+            text += "\t - interface (int)\n"
+            text += "\t - armor (arm)"
 
+        bot.sendMessage(chat_id=update.message.chat_id, text=text)
+        
+    def show_character_sheet(self, bot, update, args):
+        #Mira si es GM
+        username = update.message.from_user.username
+        if self.db.is_gm(username):
+            character_user = args[0].replace('@','')
+        else:
+            character_user = username
+        
+        character = self._get_character(character_user)
+        text = character.get_data_sheet()
+        bot.sendMessage('@{}'.format(username), text)
 
 @click.command()
 @click.option('--db_path', '-db', help="Path a la base de datos que consultará", type=click.Path(), default="./db.json")
@@ -125,6 +133,8 @@ def main(db_path):
     token = get_token()
     updater = Updater(token=get_token())
     dispatcher = updater.dispatcher
+
+    driver = GameDriver(db_path)
 
     # /set_dm <name>
     # /create_character name
@@ -149,39 +159,24 @@ def main(db_path):
     dispatcher.add_handler(dice_handler)
 
     # DM
-    """
-    set_dm_handler = CommandHandler("set_dm", set_DM)
+    set_dm_handler = CommandHandler("set_dm", driver.set_dm_handler)
     dispatcher.add_handler(set_dm_handler)
-    """
 
-    # Character
-    """
-    change_health_handler = CommandHandler('changehealth', alterHealth)
-    create_character_handler = CommandHandler('createcharacter', createCharacter)
-    print_character_handler = CommandHandler('printcharacterstats', printCharacterStats)
-    update_inventory_handler = CommandHandler('updateinventory', inventoryUpdate)
-    print_inventory_handler = CommandHandler('printinventory', printInventory)
-    change_gold_handler = CommandHandler('changegold', alterGold)
-    change_exp_handler = CommandHandler('changexp', alterExperience)
-    dispatcher.add_handler(change_health_handler)
-    dispatcher.add_handler(create_character_handler)
-    dispatcher.add_handler(print_character_handler)
-    dispatcher.add_handler(update_inventory_handler)
-    dispatcher.add_handler(print_inventory_handler)
-    dispatcher.add_handler(change_gold_handler)
-    dispatcher.add_handler(change_exp_handler)
-    """
+    # setters - Character
+    naming_handler = CommandHandler("set_name", driver.set_name)
+    set_origin_handler = CommandHandler("set_origin", driver.set_origin)
+    set_archetypes_handler = CommandHandler("set_arch", driver.set_archetypes)
+    set_stats_handler = CommandHandler("set_stat", driver.set_stat)
+    dispatcher.add_handler(naming_handler)
+    dispatcher.add_handler(set_origin_handler)
+    dispatcher.add_handler(set_archetypes_handler)
+    dispatcher.add_handler(set_stats_handler)
 
-    # Monsters
-    """
-    create_monster_handler = CommandHandler("createmonster", create_monster)
-    attack_monster_handler = CommandHandler("attachmonster", attack_monster)
-    dispatcher.add_handler(create_monster_handler)
-    dispatcher.add_handler(attack_monster_handler)
-    """
+    # setters - Character
+    get_sheet_handler = CommandHandler("view_character", driver.get_data_sheet)
+    dispatcher.add_handler(get_sheet_handler)
 
     updater.start_polling()
-
     updater.idle()
 
 if __name__ == "__main__":
